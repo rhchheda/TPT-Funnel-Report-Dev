@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPT Admin Panel — EE Lab, KLE-CTIE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ PASTE GAS WEB APP URL HERE ══════════════════════════ */
+
+:root{
+  --navy:#0d1b3e;--navy-mid:#1a2f5e;
+  --gold:#c9a84c;--gold-l:#e8c97a;--gold-pale:#f5e9c8;
+  --cream:#faf8f3;--soft:#f0ece0;--white:#ffffff;
+  --text:#0d1b3e;--muted:#6b7a99;--border:rgba(13,27,62,0.10);
+  --shadow:0 8px 32px rgba(13,27,62,0.10);
+  --green:#1b7a3e;--red:#c0392b;--blue:#2471a3;--purple:#6c3483;
+  --footer-h:36px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--soft);color:var(--text);padding-bottom:var(--footer-h);}
+
+/* ── STICKY FOOTER ── */
+.sticky-footer{
+  position:fixed;bottom:0;left:0;right:0;height:var(--footer-h);
+  background:var(--navy);border-top:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center;z-index:300;
+}
+.sticky-footer span{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;}
+.sticky-footer b{color:var(--gold);font-weight:400;font-style:italic;}
+
+/* ── LOGIN OVERLAY ── */
+.login-overlay{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  z-index:500;
+}
+.login-overlay.hidden{display:none;}
+.login-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);
+  border-radius:20px;padding:2.5rem;width:100%;max-width:380px;text-align:center;
+}
+.login-logo{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--gold);font-style:italic;}
+.login-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:2rem;letter-spacing:0.06em;text-transform:uppercase;}
+.login-label{font-size:11px;font-weight:500;color:rgba(255,255,255,0.5);text-align:left;margin-bottom:6px;letter-spacing:0.06em;text-transform:uppercase;}
+.login-input{
+  width:100%;background:rgba(255,255,255,0.06);
+  border:1px solid rgba(201,168,76,0.2);border-radius:8px;
+  padding:10px 14px;color:var(--white);font-size:14px;
+  font-family:'Outfit',sans-serif;outline:none;
+  transition:border-color 0.2s;margin-bottom:1rem;
+}
+.login-input:focus{border-color:var(--gold);}
+.login-btn{
+  width:100%;background:var(--gold);color:var(--navy);
+  border:none;border-radius:8px;padding:12px;
+  font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;
+  letter-spacing:0.06em;cursor:pointer;transition:opacity 0.2s;
+}
+.login-btn:hover{opacity:0.88;}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.login-error{font-size:12px;color:#e74c3c;margin-top:10px;min-height:18px;}
+.login-spinner{display:none;font-size:12px;color:rgba(255,255,255,0.4);margin-top:10px;}
+
+/* ── HEADER ── */
+.admin-header{
+  background:var(--navy);padding:1.25rem 2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:100;
+}
+.admin-header-left{}
+.admin-brand{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);}
+.admin-brand span{color:var(--gold);font-style:italic;}
+.admin-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;}
+.admin-header-right{display:flex;align-items:center;gap:12px;}
+.admin-ts{font-size:11px;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;text-align:right;}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(27,122,62,0.2);border:1px solid rgba(27,122,62,0.4);border-radius:20px;padding:4px 10px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#2ecc71;animation:livePulse 2s infinite;}
+@keyframes livePulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.live-text{font-size:10px;color:#2ecc71;font-weight:500;letter-spacing:0.06em;}
+.logout-btn{font-size:11px;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:4px 12px;cursor:pointer;transition:all 0.2s;}
+.logout-btn:hover{color:var(--white);border-color:rgba(255,255,255,0.3);}
+
+/* ── CONTAINER ── */
+.container{max-width:1300px;margin:0 auto;padding:1.5rem;}
+
+/* ── SAVE BANNER ── */
+.save-banner{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--green);color:var(--white);
+  font-size:12px;font-weight:500;text-align:center;
+  padding:8px;transform:translateY(-100%);transition:transform 0.3s;
+}
+.save-banner.show{transform:translateY(0);}
+.save-banner.error{background:var(--red);}
+
+/* ── ADMIN KPI CARDS ── */
+.admin-kpi-section{margin-bottom:1.5rem;}
+.admin-kpi-title{
+  font-size:11px;font-weight:600;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;
+  display:flex;align-items:center;gap:8px;
+}
+.admin-kpi-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+.kpi-card{background:var(--white);border-radius:12px;padding:1rem;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center;}
+.kpi-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;line-height:1;}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* ── MAIN PANEL ── */
+.panel-layout{display:grid;grid-template-columns:280px 1fr;gap:1.25rem;align-items:start;}
+
+/* ── STUDENT POOL ── */
+.pool-card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;position:sticky;top:80px;}
+.pool-header{background:var(--navy);padding:12px 16px;}
+.pool-title{font-size:13px;font-weight:600;color:var(--white);}
+.pool-count{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.pool-search{padding:10px;border-bottom:1px solid var(--border);}
+.pool-search input{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:'Outfit',sans-serif;outline:none;color:var(--text);background:var(--cream);}
+.pool-search input:focus{border-color:var(--gold);}
+.pool-list{max-height:calc(100vh - 280px);overflow-y:auto;padding:8px;}
+.student-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;margin-bottom:5px;
+  background:var(--cream);border:1px solid var(--border);
+  cursor:grab;transition:all 0.2s;user-select:none;
+}
+.student-chip:hover{border-color:var(--gold);background:var(--gold-pale);}
+.student-chip.dragging{opacity:0.5;cursor:grabbing;}
+.student-chip.placed{opacity:0.35;pointer-events:none;background:#f5f5f5;}
+.chip-avatar{
+  width:28px;height:28px;border-radius:50%;background:var(--navy);
+  color:var(--gold);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.chip-info{flex:1;min-width:0;}
+.chip-name{font-size:11px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip-meta{font-size:10px;color:var(--muted);}
+.chip-skill{font-size:9px;padding:1px 6px;border-radius:20px;font-weight:500;flex-shrink:0;}
+.cs-sw{background:#e8f0fe;color:var(--blue);}
+.cs-hw{background:#fce8e8;color:var(--red);}
+.cs-both{background:#e8f5e9;color:var(--green);}
+.cs-gen{background:#f5f5f5;color:#666;}
+
+/* ── TEAMS PANEL ── */
+.teams-panel{}
+.teams-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.teams-toolbar-title{font-size:13px;font-weight:600;color:var(--navy);}
+.add-team-btn{
+  background:var(--navy);color:var(--gold);
+  border:1px solid rgba(201,168,76,0.3);border-radius:8px;
+  padding:7px 16px;font-size:12px;font-weight:600;
+  font-family:'Outfit',sans-serif;cursor:pointer;transition:opacity 0.2s;
+}
+.add-team-btn:hover{opacity:0.85;}
+.teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+
+/* ── TEAM CARD ── */
+.team-card{
+  background:var(--white);border-radius:14px;overflow:hidden;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.team-card-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.team-id-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.5);}
+.team-status-select{
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;
+  border:none;cursor:pointer;font-family:'Outfit',sans-serif;outline:none;
+}
+.ss-draft{background:rgba(201,168,76,0.2);color:var(--gold-l);}
+.ss-confirmed{background:rgba(27,122,62,0.2);color:#2ecc71;}
+.ss-needs-member{background:rgba(192,57,43,0.2);color:#e74c3c;}
+.ss-needs-review{background:rgba(120,66,18,0.2);color:#e67e22;}
+.ss-on-hold{background:rgba(136,136,136,0.2);color:#aaa;}
+
+.team-card-body{padding:12px 14px;}
+.team-product-input{
+  width:100%;border:none;font-size:13px;font-weight:600;
+  color:var(--navy);background:transparent;outline:none;
+  font-family:'Outfit',sans-serif;margin-bottom:4px;
+  border-bottom:1px dashed transparent;transition:border-color 0.2s;
+}
+.team-product-input:focus{border-bottom-color:var(--gold);}
+
+.team-flags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.t-flag{font-size:10px;padding:2px 7px;border-radius:20px;}
+.tf-ok{background:#e8f5e9;color:var(--green);}
+.tf-warn{background:#fff8e1;color:#e65100;}
+.tf-gap{border:1px dashed rgba(13,27,62,0.15);color:var(--muted);}
+
+.member-slots{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.member-slot{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:8px;
+  min-height:40px;
+  border:1.5px dashed rgba(13,27,62,0.12);
+  background:var(--cream);transition:all 0.2s;
+  position:relative;
+}
+.member-slot.drag-over{border-color:var(--gold);background:var(--gold-pale);}
+.member-slot.filled{border-style:solid;border-color:var(--border);}
+.member-slot.is-lead{background:var(--gold-pale);border-color:rgba(201,168,76,0.4);}
+.slot-avatar{width:26px;height:26px;border-radius:50%;background:var(--navy);color:var(--gold);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slot-avatar.gold{background:var(--gold);color:var(--navy);}
+.slot-info{flex:1;min-width:0;}
+.slot-name{font-size:11px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot-meta{font-size:10px;color:var(--muted);}
+.slot-placeholder{font-size:11px;color:rgba(13,27,62,0.25);font-style:italic;}
+.slot-actions{display:flex;gap:4px;flex-shrink:0;}
+.slot-btn{
+  width:22px;height:22px;border-radius:50%;border:1px solid var(--border);
+  background:var(--white);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;transition:all 0.2s;
+}
+.slot-btn:hover{border-color:var(--gold);}
+.slot-btn.crown{font-size:12px;}
+.slot-btn.remove:hover{background:#fce8e8;border-color:var(--red);}
+
+.team-note-input{
+  width:100%;border:1px solid var(--border);border-radius:6px;
+  padding:6px 10px;font-size:11px;color:var(--text);
+  font-family:'Outfit',sans-serif;outline:none;resize:none;
+  background:var(--cream);transition:border-color 0.2s;
+}
+.team-note-input:focus{border-color:var(--gold);}
+
+.team-card-footer{
+  padding:10px 14px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.team-modified{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.save-team-btn{
+  background:var(--navy);color:var(--gold);border:1px solid rgba(201,168,76,0.3);
+  border-radius:6px;padding:5px 14px;font-size:11px;font-weight:600;
+  font-family:'Outfit',sans-serif;cursor:pointer;transition:opacity 0.2s;
+}
+.save-team-btn:hover{opacity:0.85;}
+.save-team-btn.saving{opacity:0.5;pointer-events:none;}
+
+/* ── SUGGESTED TEAMS REFERENCE ── */
+.suggested-section{margin-top:2rem;}
+.suggested-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:1rem;
+}
+.suggested-label::before{content:'🤖';}
+.suggested-label::after{content:'— System generated · Read only';}
+.suggested-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.suggested-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:12px;padding:1rem;opacity:0.75;
+  transition:opacity 0.2s;
+}
+.suggested-card:hover{opacity:1;}
+.suggested-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.sug-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.sug-status{font-size:10px;padding:2px 7px;border-radius:20px;}
+.sug-product{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;line-height:1.4;}
+.sug-lead{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.sug-lead b{color:var(--navy);}
+.sug-members{display:flex;flex-wrap:wrap;gap:4px;}
+.sug-chip{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--cream);color:var(--text);}
+.sug-flags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+
+/* ── LOADING ── */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(13,27,62,0.85);
+  display:flex;align-items:center;justify-content:center;z-index:400;
+}
+.loading-overlay.hidden{display:none;}
+.loading-text{color:var(--gold);font-size:14px;font-family:'JetBrains Mono',monospace;}
+
+@media(max-width:900px){.panel-layout{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<script>
+const GAS_URL  = "PASTE_YOUR_GAS_WEB_APP_URL_HERE";
+const PASSWORD = "KleTpt2026";
+</script>
+
+<!-- STICKY FOOTER -->
+<div class="sticky-footer">
+  <span>Made with ❤ ~rhc &nbsp;<b>·</b>&nbsp; EE Lab, KLE-CTIE &nbsp;<b>·</b>&nbsp; TPT Admin Panel &nbsp;<b>·</b>&nbsp; May 2026</span>
+</div>
+
+<!-- SAVE BANNER -->
+<div class="save-banner" id="saveBanner"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <span class="loading-text" id="loadingText">Saving...</span>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">Tech <span>Prowess</span> Team</div>
+    <div class="login-sub">Admin Panel · Restricted Access</div>
+    <div class="login-label">Password</div>
+    <input class="login-input" type="password" id="passwordInput"
+      placeholder="Enter admin password"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Access Admin Panel →</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-spinner" id="loginSpinner">Verifying...</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL — hidden until login -->
+<div id="adminPanel" style="display:none;">
+
+  <!-- HEADER -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-brand">Tech <span>Prowess</span> Team — <span style="font-size:14px;color:rgba(255,255,255,0.6);">Admin Panel</span></div>
+      <div class="admin-sub">EE Lab · KLE-CTIE · Team Formation & Management</div>
+    </div>
+    <div class="admin-header-right">
+      <div class="admin-ts">Last synced<br><span id="syncTime" style="color:var(--gold);">—</span></div>
+      <div class="live-badge"><div class="live-dot"></div><span class="live-text">LIVE</span></div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- PROGRAM KPIs -->
+    <div class="admin-kpi-section">
+      <div class="admin-kpi-title">Program KPIs — Live from Sheet</div>
+      <div class="kpi-grid" id="programKpis"></div>
+    </div>
+
+    <!-- ADMIN KPIs -->
+    <div class="admin-kpi-section">
+      <div class="admin-kpi-title">Team Formation KPIs — Updates on Save</div>
+      <div class="kpi-grid" id="adminKpis"></div>
+    </div>
+
+    <!-- MAIN PANEL -->
+    <div class="panel-layout">
+
+      <!-- STUDENT POOL -->
+      <div class="pool-card">
+        <div class="pool-header">
+          <div class="pool-title">Student Pool</div>
+          <div class="pool-count" id="poolCount">— students</div>
+        </div>
+        <div class="pool-search">
+          <input type="text" placeholder="Search students..." oninput="filterPool(this.value)" id="poolSearch">
+        </div>
+        <div class="pool-list" id="poolList"></div>
+      </div>
+
+      <!-- TEAMS PANEL -->
+      <div class="teams-panel">
+        <div class="teams-toolbar">
+          <div class="teams-toolbar-title" id="teamsToolbarTitle">Admin Teams</div>
+          <button class="add-team-btn" onclick="addNewTeam()">+ New Team</button>
+        </div>
+        <div class="teams-grid" id="teamsGrid"></div>
+
+        <!-- SUGGESTED REFERENCE -->
+        <div class="suggested-section">
+          <div class="suggested-label"></div>
+          <div class="suggested-grid" id="suggestedGrid"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /adminPanel -->
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let ALL_STUDENTS    = [];
+let ADMIN_TEAMS     = [];
+let SUGGESTED_TEAMS = [];
+let PLACED_USNS     = new Set();
+let DRAG_USN        = null;
+let TEAM_COUNTER    = 0;
+let PROGRAM_KPIS    = {};
+let ADMIN_KPIS_DATA = {};
+
+// ══════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════
+function avatar(name){
+  const p = String(name).trim().split(' ');
+  return p.length>=2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase();
+}
+
+function skillCls(type){
+  const m = {'Software / AI':'cs-sw','Both HW + SW':'cs-both','Hardware':'cs-hw'};
+  return m[type]||'cs-gen';
+}
+
+function statusCls(status){
+  const m = {'Draft':'ss-draft','Confirmed':'ss-confirmed',
+    'Needs Member':'ss-needs-member','Needs Review':'ss-needs-review','On Hold':'ss-on-hold'};
+  return m[status]||'ss-draft';
+}
+
+function flagHtml(team){
+  return (team.isCrossDisc
+    ? `<span class="t-flag tf-ok">✓ Cross-disc</span>`
+    : `<span class="t-flag tf-warn">⚠ Same branch</span>`)
+  + (team.hasHW ? `<span class="t-flag tf-ok">✓ HW</span>` : `<span class="t-flag tf-gap">Need HW</span>`)
+  + (team.hasSW ? `<span class="t-flag tf-ok">✓ SW</span>` : `<span class="t-flag tf-gap">Need SW</span>`);
+}
+
+function showBanner(msg, isError=false){
+  const b = document.getElementById('saveBanner');
+  b.textContent = msg;
+  b.className = 'save-banner show' + (isError?' error':'');
+  setTimeout(()=>{ b.className='save-banner'; }, 2800);
+}
+
+function setLoading(show, msg='Saving...'){
+  document.getElementById('loadingOverlay').classList.toggle('hidden',!show);
+  document.getElementById('loadingText').textContent = msg;
+}
+
+function nextTeamId(){
+  const existing = ADMIN_TEAMS.map(t=>parseInt((t.teamId||'TPT-T00').replace('TPT-T',''))||0);
+  const max = existing.length ? Math.max(...existing) : 0;
+  return 'TPT-T' + String(max+1).padStart(2,'0');
+}
+
+function teamFromDom(card){
+  const teamId  = card.dataset.teamid;
+  const product = card.querySelector('.team-product-input').value.trim();
+  const status  = card.querySelector('.team-status-select').value;
+  const note    = card.querySelector('.team-note-input').value.trim();
+  const slots   = [...card.querySelectorAll('.member-slot')];
+  const members = slots.map(slot => {
+    const usn = slot.dataset.usn;
+    if (!usn) return null;
+    return { usn, isLead: slot.classList.contains('is-lead') };
+  }).filter(Boolean);
+  return { teamId, product, status, note, members };
+}
+
+function recomputeFlags(card){
+  const slots   = [...card.querySelectorAll('.member-slot.filled')];
+  const usns    = slots.map(s=>s.dataset.usn).filter(Boolean);
+  const members = usns.map(u=>ALL_STUDENTS.find(s=>s.usn===u)).filter(Boolean);
+  const branches  = [...new Set(members.map(m=>m.branch))];
+  const isCross   = branches.length >= 2;
+  const hasHW     = members.some(m=>['Hardware','Both HW + SW'].includes(m.skillType));
+  const hasSW     = members.some(m=>['Software / AI','Both HW + SW'].includes(m.skillType));
+  const fakeTeam  = { isCrossDisc:isCross, hasHW, hasSW };
+  card.querySelector('.team-flags').innerHTML = flagHtml(fakeTeam);
+}
+
+// ══════════════════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════════════════
+async function doLogin(){
+  const pw  = document.getElementById('passwordInput').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  const spn = document.getElementById('loginSpinner');
+  if (!pw){ err.textContent='Please enter the password.'; return; }
+  btn.disabled=true; spn.style.display='block'; err.textContent='';
+  try{
+    const res  = await fetch(GAS_URL, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'verifyPassword', password:pw })
+    });
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('adminPanel').style.display='block';
+      await loadData();
+    } else {
+      err.textContent = 'Incorrect password. Try again.';
+      btn.disabled=false; spn.style.display='none';
+    }
+  } catch(e){
+    err.textContent = 'Connection error. Check GAS URL.';
+    btn.disabled=false; spn.style.display='none';
+  }
+}
+
+function doLogout(){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('passwordInput').value='';
+  document.getElementById('loginError').textContent='';
+}
+
+// ══════════════════════════════════════════════════════
+//  LOAD DATA
+// ══════════════════════════════════════════════════════
+async function loadData(){
+  setLoading(true,'Loading data from Sheet...');
+  try{
+    const res  = await fetch(GAS_URL + '?t=' + Date.now(), { redirect:'follow' });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error);
+
+    ALL_STUDENTS    = data.students || [];
+    SUGGESTED_TEAMS = data.suggestedTeams || [];
+    PROGRAM_KPIS    = data.kpis || {};
+    ADMIN_KPIS_DATA = data.adminKpis || {};
+    PLACED_USNS     = new Set(data.placedUSNs || []);
+
+    // seed admin teams from sheet or from suggested if empty
+    ADMIN_TEAMS = (data.adminTeams && data.adminTeams.length)
+      ? data.adminTeams
+      : SUGGESTED_TEAMS.map(t=>({
+          teamId    : t.teamId,
+          product   : t.product,
+          status    : 'Draft',
+          note      : '',
+          members   : t.members,
+          isCrossDisc:t.isCrossDisc,
+          hasHW     : t.hasHW,
+          hasSW     : t.hasSW,
+          branches  : t.branches
+        }));
+
+    document.getElementById('syncTime').textContent = data.timestamp || '—';
+
+    renderProgramKPIs();
+    renderAdminKPIs();
+    renderPool();
+    renderTeams();
+    renderSuggested();
+    setLoading(false);
+  } catch(e){
+    setLoading(false);
+    showBanner('Failed to load: ' + e.message, true);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER PROGRAM KPIs
+// ══════════════════════════════════════════════════════
+function renderProgramKPIs(){
+  const k = PROGRAM_KPIS;
+  const cards = [
+    { label:'Total Registered', value:k.total,          sub:'Students',         color:'var(--navy)'   },
+    { label:'Branches',         value:k.uniqueBranches,  sub:'Disciplines',      color:'var(--blue)'   },
+    { label:'Unique Ideas',     value:k.uniqueProducts,  sub:'Product concepts', color:'var(--purple)' },
+    { label:'Own PS',           value:k.ownPsCount,      sub:'Own problem stmt', color:'var(--green)'  },
+    { label:'HW Capable',       value:k.hwCap,           sub:'Students',         color:'#784212'       },
+    { label:'SW / AI Capable',  value:k.swCap,           sub:'Students',         color:'var(--blue)'   }
+  ];
+  document.getElementById('programKpis').innerHTML = cards.map(c=>
+    `<div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value" style="color:${c.color}">${c.value||0}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER ADMIN KPIs
+// ══════════════════════════════════════════════════════
+function renderAdminKPIs(){
+  // recompute from current admin teams state
+  const confirmed   = ADMIN_TEAMS.filter(t=>t.status==='Confirmed').length;
+  const draft       = ADMIN_TEAMS.filter(t=>t.status==='Draft').length;
+  const needsMember = ADMIN_TEAMS.filter(t=>t.status==='Needs Member').length;
+  const onHold      = ADMIN_TEAMS.filter(t=>t.status==='On Hold').length;
+  const placed      = PLACED_USNS.size;
+  const unplaced    = (PROGRAM_KPIS.total||0) - placed;
+  const ready       = ADMIN_TEAMS.filter(t=>t.isCrossDisc&&t.hasHW&&t.hasSW&&t.members&&t.members.length>=2).length;
+
+  const cards = [
+    { label:'Admin Teams',      value:ADMIN_TEAMS.length, sub:'Total',           color:'var(--navy)'  },
+    { label:'Confirmed',        value:confirmed,           sub:'Locked & ready',  color:'var(--green)' },
+    { label:'Draft',            value:draft,               sub:'In progress',     color:'var(--gold)'  },
+    { label:'Needs Attention',  value:needsMember+onHold,  sub:'Review needed',   color:'var(--red)'   },
+    { label:'Students Placed',  value:placed,              sub:'In a team',       color:'var(--green)' },
+    { label:'Unplaced',         value:unplaced,            sub:'Need assignment',  color:'var(--red)'   }
+  ];
+  document.getElementById('adminKpis').innerHTML = cards.map(c=>
+    `<div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value" style="color:${c.color}">${c.value}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER STUDENT POOL
+// ══════════════════════════════════════════════════════
+function renderPool(filter=''){
+  const q       = filter.toLowerCase();
+  const visible = ALL_STUDENTS.filter(s=>
+    !q || s.name.toLowerCase().includes(q) ||
+    s.branch.toLowerCase().includes(q) ||
+    s.product.toLowerCase().includes(q)
+  );
+  const unplaced = visible.filter(s=>!PLACED_USNS.has(s.usn));
+  const placed   = visible.filter(s=> PLACED_USNS.has(s.usn));
+  const sorted   = [...unplaced, ...placed];
+
+  document.getElementById('poolCount').textContent =
+    `${unplaced.length} unplaced · ${placed.length} placed`;
+
+  document.getElementById('poolList').innerHTML = sorted.map(s=>`
+    <div class="student-chip ${PLACED_USNS.has(s.usn)?'placed':''}"
+      data-usn="${s.usn}" draggable="true"
+      ondragstart="onDragStart(event,'${s.usn}')"
+      ondragend="onDragEnd(event)">
+      <div class="chip-avatar">${avatar(s.name)}</div>
+      <div class="chip-info">
+        <div class="chip-name">${s.name}</div>
+        <div class="chip-meta">${s.branch} · ${s.year}</div>
+      </div>
+      <span class="chip-skill ${skillCls(s.skillType)}">${s.skillType.split(' ')[0]}</span>
+    </div>`
+  ).join('');
+}
+
+function filterPool(q){ renderPool(q); }
+
+// ══════════════════════════════════════════════════════
+//  RENDER ADMIN TEAMS
+// ══════════════════════════════════════════════════════
+function renderTeams(){
+  const hdrColors = ['#0d1b3e','#1a2f5e','#2471a3','#6c3483','#1b7a3e','#784212','#c0392b','#c9a84c'];
+  document.getElementById('teamsToolbarTitle').textContent =
+    `Admin Teams (${ADMIN_TEAMS.length})`;
+
+  document.getElementById('teamsGrid').innerHTML = ADMIN_TEAMS.map((team,ti)=>{
+    const hdr = hdrColors[ti % hdrColors.length];
+    const slotsHtml = [0,1,2,3].map(si=>{
+      const m = (team.members||[])[si];
+      if(m){
+        const s = ALL_STUDENTS.find(st=>st.usn===m.usn)||{name:m.usn,branch:'—',year:'—',skillType:'General'};
+        const isLead = m.isLead;
+        return `<div class="member-slot filled ${isLead?'is-lead':''}"
+          data-usn="${m.usn}" data-slot="${si}"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="onDrop(event,this)">
+          <div class="slot-avatar ${isLead?'gold':''}">${avatar(s.name)}</div>
+          <div class="slot-info">
+            <div class="slot-name">${s.name}${isLead?' 👑':''}</div>
+            <div class="slot-meta">${s.branch} · ${s.year}</div>
+          </div>
+          <div class="slot-actions">
+            <button class="slot-btn crown" title="Make lead" onclick="assignLead(this,'${team.teamId}','${m.usn}')">👑</button>
+            <button class="slot-btn remove" title="Remove" onclick="removeMember(this,'${team.teamId}','${m.usn}')">×</button>
+          </div>
+        </div>`;
+      } else {
+        return `<div class="member-slot" data-slot="${si}" data-teamid="${team.teamId}"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="onDrop(event,this)">
+          <span class="slot-placeholder">Drop student here</span>
+        </div>`;
+      }
+    }).join('');
+
+    return `<div class="team-card" data-teamid="${team.teamId}">
+      <div class="team-card-header" style="background:${hdr}">
+        <span class="team-id-label">${team.teamId}</span>
+        <select class="team-status-select ${statusCls(team.status)}"
+          onchange="onStatusChange(this,'${team.teamId}')">
+          ${['Draft','Confirmed','Needs Member','Needs Review','On Hold'].map(s=>
+            `<option value="${s}" ${s===team.status?'selected':''}>${s}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="team-card-body">
+        <input class="team-product-input" value="${team.product||''}" placeholder="Product name...">
+        <div class="team-flags">${flagHtml(team)}</div>
+        <div class="member-slots">${slotsHtml}</div>
+        <textarea class="team-note-input" rows="2"
+          placeholder="Admin note — flags, observations, requirements...">${team.note||''}</textarea>
+      </div>
+      <div class="team-card-footer">
+        <span class="team-modified">Tap Save to sync</span>
+        <button class="save-team-btn" onclick="saveTeam(this,'${team.teamId}')">Save →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER SUGGESTED (reference)
+// ══════════════════════════════════════════════════════
+function renderSuggested(){
+  const statusColors = {
+    'Ready'       :'#e8f5e9','Needs Member':'#fce8e8',
+    'Needs Review':'#fff8e1','Draft':'#f5f5f5'
+  };
+  document.getElementById('suggestedGrid').innerHTML = SUGGESTED_TEAMS.map(t=>`
+    <div class="suggested-card">
+      <div class="suggested-card-top">
+        <span class="sug-id">${t.teamId}</span>
+        <span class="sug-status" style="background:${statusColors[t.status]||'#eee'};color:#333;">${t.status}</span>
+      </div>
+      <div class="sug-product">${t.product}</div>
+      <div class="sug-lead">Lead: <b>${t.suggestedLead||'—'}</b></div>
+      <div class="sug-members">
+        ${(t.members||[]).map(m=>`<span class="sug-chip">${m.name.split(' ')[0]} · ${m.branch}</span>`).join('')}
+      </div>
+      <div class="sug-flags">
+        ${t.isCrossDisc?'<span class="t-flag tf-ok">✓ Cross</span>':'<span class="t-flag tf-warn">⚠ Same branch</span>'}
+        ${(t.gaps||[]).map(g=>`<span class="t-flag tf-gap">${g}</span>`).join('')}
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  DRAG AND DROP
+// ══════════════════════════════════════════════════════
+function onDragStart(e, usn){
+  DRAG_USN = usn;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.member-slot').forEach(s=>s.classList.remove('drag-over'));
+}
+
+function onDrop(e, slot){
+  e.preventDefault();
+  slot.classList.remove('drag-over');
+  if (!DRAG_USN) return;
+
+  const card   = slot.closest('.team-card');
+  const teamId = card.dataset.teamid;
+  const team   = ADMIN_TEAMS.find(t=>t.teamId===teamId);
+  if (!team) return;
+
+  // check max 4 members
+  const filled = card.querySelectorAll('.member-slot.filled').length;
+  if (filled >= 4 && !slot.classList.contains('filled')){
+    showBanner('Team already has 4 members — maximum reached', true); return;
+  }
+
+  // check not already in this team
+  if((team.members||[]).find(m=>m.usn===DRAG_USN)){
+    showBanner('Student already in this team', true); return;
+  }
+
+  // add to team
+  if (!team.members) team.members = [];
+  // if dropping into a filled slot — swap out existing
+  const existingUsn = slot.dataset.usn;
+  if (existingUsn) {
+    team.members = team.members.filter(m=>m.usn!==existingUsn);
+    PLACED_USNS.delete(existingUsn);
+  }
+  team.members.push({ usn:DRAG_USN, isLead: team.members.length === 0 });
+  PLACED_USNS.add(DRAG_USN);
+
+  // recompute flags
+  const members = team.members.map(m=>ALL_STUDENTS.find(s=>s.usn===m.usn)).filter(Boolean);
+  const branches = [...new Set(members.map(m=>m.branch))];
+  team.isCrossDisc = branches.length >= 2;
+  team.hasHW = members.some(m=>['Hardware','Both HW + SW'].includes(m.skillType));
+  team.hasSW = members.some(m=>['Software / AI','Both HW + SW'].includes(m.skillType));
+
+  DRAG_USN = null;
+  renderTeams();
+  renderPool(document.getElementById('poolSearch').value);
+  renderAdminKPIs();
+}
+
+// ══════════════════════════════════════════════════════
+//  REMOVE MEMBER
+// ══════════════════════════════════════════════════════
+function removeMember(btn, teamId, usn){
+  const team = ADMIN_TEAMS.find(t=>t.teamId===teamId);
+  if (!team) return;
+  team.members = (team.members||[]).filter(m=>m.usn!==usn);
+  PLACED_USNS.delete(usn);
+  // if removed was lead, assign first remaining as lead
+  if (team.members.length && !team.members.find(m=>m.isLead))
+    team.members[0].isLead = true;
+  // recompute
+  const members = team.members.map(m=>ALL_STUDENTS.find(s=>s.usn===m.usn)).filter(Boolean);
+  const branches = [...new Set(members.map(m=>m.branch))];
+  team.isCrossDisc = branches.length >= 2;
+  team.hasHW = members.some(m=>['Hardware','Both HW + SW'].includes(m.skillType));
+  team.hasSW = members.some(m=>['Software / AI','Both HW + SW'].includes(m.skillType));
+  renderTeams();
+  renderPool(document.getElementById('poolSearch').value);
+  renderAdminKPIs();
+}
+
+// ══════════════════════════════════════════════════════
+//  ASSIGN LEAD
+// ══════════════════════════════════════════════════════
+function assignLead(btn, teamId, usn){
+  const team = ADMIN_TEAMS.find(t=>t.teamId===teamId);
+  if (!team) return;
+  (team.members||[]).forEach(m=>{ m.isLead = m.usn === usn; });
+  renderTeams();
+  showBanner('Lead updated — click Save to sync');
+}
+
+// ══════════════════════════════════════════════════════
+//  STATUS CHANGE
+// ══════════════════════════════════════════════════════
+function onStatusChange(sel, teamId){
+  const team = ADMIN_TEAMS.find(t=>t.teamId===teamId);
+  if (team) team.status = sel.value;
+  sel.className = 'team-status-select ' + statusCls(sel.value);
+  renderAdminKPIs();
+}
+
+// ══════════════════════════════════════════════════════
+//  ADD NEW TEAM
+// ══════════════════════════════════════════════════════
+function addNewTeam(){
+  const newTeam = {
+    teamId:nextTeamId(), product:'New Product', status:'Draft',
+    note:'', members:[], isCrossDisc:false, hasHW:false, hasSW:false, branches:[]
+  };
+  ADMIN_TEAMS.push(newTeam);
+  renderTeams();
+  renderAdminKPIs();
+  // scroll to bottom of teams grid
+  document.getElementById('teamsGrid').lastElementChild?.scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════
+//  SAVE TEAM
+// ══════════════════════════════════════════════════════
+async function saveTeam(btn, teamId){
+  const card = btn.closest('.team-card');
+  const teamData = teamFromDom(card);
+  // update local state
+  const idx = ADMIN_TEAMS.findIndex(t=>t.teamId===teamId);
+  if (idx>-1) ADMIN_TEAMS[idx] = { ...ADMIN_TEAMS[idx], ...teamData };
+
+  btn.classList.add('saving');
+  btn.textContent = 'Saving...';
+
+  try{
+    const res = await fetch(GAS_URL, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action  : 'updateTeam',
+        password: PASSWORD,
+        ...teamData
+      })
+    });
+    const data = await res.json();
+    if(data.ok){
+      card.querySelector('.team-modified').textContent = 'Saved · ' + new Date().toLocaleTimeString();
+      showBanner(`${teamId} saved successfully`);
+    } else {
+      showBanner('Save failed: ' + data.error, true);
+    }
+  } catch(e){
+    showBanner('Connection error: ' + e.message, true);
+  }
+  btn.classList.remove('saving');
+  btn.textContent = 'Save →';
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  // auto-focus password
+  document.getElementById('passwordInput').focus();
+  // enter key on password
+  document.getElementById('passwordInput').addEventListener('keydown', e=>{
+    if(e.key==='Enter') doLogin();
+  });
+});
+</script>
+
+<!--
+════════════════════════════════════════════════════
+  SETUP INSTRUCTIONS
+════════════════════════════════════════════════════
+  STEP 1 — Replace GAS_URL at top of this file
+           with your deployed Web App URL
+
+  STEP 2 — In Apps Script, run testSetupAdmin()
+           to create the Admin tab in the Sheet
+
+  STEP 3 — Deploy GAS as Web App
+           Execute as: Me · Anyone can access
+
+  STEP 4 — Upload this file to GitHub repo
+           URL: github.io/TPT_Funnel_Report/admin.html
+
+  STEP 5 — Open admin.html · Enter: KleTpt2026
+════════════════════════════════════════════════════
+-->
+</body>
+</html>

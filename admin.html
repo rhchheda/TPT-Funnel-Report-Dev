@@ -502,7 +502,7 @@ function doLogout(){
 //  LOAD DATA
 // ══════════════════════════════════════════════════════
 async function loadData(){
-  setLoading(true,'Loading data from Sheet...');
+  setLoading(true,'Loading data from Tech Prowess-2026 ...');
   try{
     const res  = await fetch(GAS_URL + '?t=' + Date.now(), { redirect:'follow' });
     const data = await res.json();

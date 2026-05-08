@@ -256,7 +256,57 @@ td{padding:9px 14px;vertical-align:middle;}
 .insight-text{font-size:13px;color:var(--muted);line-height:1.65;}
 .insight-card.dark .insight-text{color:rgba(255,255,255,0.5);}
 
-/* ── REVEAL ── */
+/* ── ADMIN TEAM CARDS — confirmed style ── */
+.admin-team-card{
+  background:var(--white);border-radius:14px;overflow:hidden;
+  border:1px solid rgba(27,122,62,0.2);
+  box-shadow:0 4px 20px rgba(27,122,62,0.08);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.admin-team-card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(13,27,62,0.12);}
+.admin-team-card.draft{border-color:rgba(201,168,76,0.3);box-shadow:0 4px 20px rgba(201,168,76,0.08);}
+.admin-team-card.needs-review{border-color:rgba(192,57,43,0.2);box-shadow:0 4px 20px rgba(192,57,43,0.06);}
+.admin-card-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.admin-card-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.55);}
+.admin-status-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.asb-confirmed{background:rgba(27,122,62,0.25);color:#2ecc71;}
+.asb-draft{background:rgba(201,168,76,0.25);color:var(--gold-l);}
+.asb-needs-member{background:rgba(192,57,43,0.25);color:#e74c3c;}
+.asb-needs-review{background:rgba(120,66,18,0.25);color:#e67e22;}
+.asb-on-hold{background:rgba(136,136,136,0.2);color:#aaa;}
+.admin-card-body{padding:12px 16px;}
+.admin-product{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;line-height:1.4;}
+.admin-lead-row{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.admin-lead-row b{color:var(--navy);}
+.admin-members{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.admin-member-row{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  border-radius:8px;background:var(--cream);
+}
+.admin-member-row.is-lead{background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);}
+.admin-member-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--navy);color:var(--gold);
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.admin-member-row.is-lead .admin-member-avatar{background:var(--gold);color:var(--navy);}
+.admin-member-info{flex:1;min-width:0;}
+.admin-member-name{font-size:12px;font-weight:500;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.admin-member-meta{font-size:10px;color:var(--muted);}
+.admin-note-box{
+  font-size:11px;color:var(--muted);
+  background:var(--soft);border-radius:6px;
+  padding:6px 10px;border-left:3px solid var(--gold);
+  margin-bottom:8px;font-style:italic;
+}
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:2.5rem;
+  background:var(--white);border-radius:14px;border:1px dashed var(--border);
+}
+.empty-state-icon{font-size:32px;margin-bottom:0.75rem;}
+.empty-state-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.empty-state-text{font-size:13px;color:var(--muted);line-height:1.65;}
 .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
 .reveal.vis{opacity:1;transform:translateY(0);}
 
@@ -347,11 +397,24 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxvX8D2PQUV7gxlxmGh7jQj
       <div class="product-grid" id="productGrid"></div>
     </section>
 
-    <!-- TEAM RECOMMENDATIONS -->
+    <!-- 4A — ADMIN CONFIRMED TEAMS -->
+    <section class="reveal" id="adminTeamsSection">
+      <div class="sec-label"><span class="sec-num">04A</span><div class="sec-line"></div></div>
+      <div class="sec-title">Admin <em>Confirmed Teams</em></div>
+      <div class="sec-sub" id="adminTeamsSub"></div>
+      <div class="teams-grid" id="adminTeamsGrid"></div>
+    </section>
+
+    <!-- 4B — SUGGESTED BY SYSTEM -->
     <section class="reveal">
-      <div class="sec-label"><span class="sec-num">04</span><div class="sec-line"></div></div>
-      <div class="sec-title">Suggested <em>Teams</em></div>
+      <div class="sec-label"><span class="sec-num">04B</span><div class="sec-line"></div></div>
+      <div class="sec-title">System <em>Suggested Teams</em></div>
       <div class="sec-sub" id="teamsSub"></div>
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:1rem;
+                  font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0.06em;">
+        <span>🤖</span>
+        <span>Auto-generated from product interest, skills & year — logic driven · Read only reference</span>
+      </div>
       <div class="teams-grid" id="teamsGrid"></div>
     </section>
 
@@ -643,6 +706,110 @@ function renderTeams(teams, total){
   }).join('');
 }
 
+function renderAdminTeams(adminTeams, total){
+  const hdrColors = {
+    'Confirmed'   :'#1b7a3e',
+    'Draft'       :'#784212',
+    'Needs Member':'#c0392b',
+    'Needs Review':'#6c3483',
+    'On Hold'     :'#555555'
+  };
+  const statusBadgeCls = {
+    'Confirmed'   :'asb-confirmed',
+    'Draft'       :'asb-draft',
+    'Needs Member':'asb-needs-member',
+    'Needs Review':'asb-needs-review',
+    'On Hold'     :'asb-on-hold'
+  };
+  const cardCls = {
+    'Confirmed'   :'',
+    'Draft'       :'draft',
+    'Needs Member':'needs-review',
+    'Needs Review':'needs-review',
+    'On Hold'     :'draft'
+  };
+
+  // subtitle
+  const confirmed = (adminTeams||[]).filter(t=>t.status==='Confirmed').length;
+  const draft     = (adminTeams||[]).filter(t=>t.status==='Draft').length;
+  document.getElementById('adminTeamsSub').textContent =
+    adminTeams && adminTeams.length
+      ? `${adminTeams.length} teams managed by admin — ${confirmed} confirmed, ${draft} draft. Last updated from admin panel.`
+      : 'No admin teams yet. Admin panel will populate this section once teams are saved.';
+
+  // empty state
+  if (!adminTeams || adminTeams.length === 0){
+    document.getElementById('adminTeamsGrid').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚙️</div>
+        <div class="empty-state-title">No Admin Teams Yet</div>
+        <div class="empty-state-text">
+          Open the admin panel, build your teams using drag & drop,<br>
+          and click Save on each card. They will appear here live.
+        </div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('adminTeamsGrid').innerHTML = adminTeams.map(team => {
+    const hdr   = hdrColors[team.status] || '#0d1b3e';
+    const badge = statusBadgeCls[team.status] || 'asb-draft';
+    const cls   = cardCls[team.status] || '';
+
+    const membersHtml = (team.members||[]).map(m =>
+      `<div class="admin-member-row ${m.isLead?'is-lead':''}">
+        <div class="admin-member-avatar">${avatar_(m.name)}</div>
+        <div class="admin-member-info">
+          <div class="admin-member-name">${m.name}${m.isLead?' 👑':''}</div>
+          <div class="admin-member-meta">${m.branch} · ${m.year}</div>
+        </div>
+        ${skillPill_(m.skillType)}
+      </div>`
+    ).join('');
+
+    const flagsHtml =
+      `<span class="t-flag ${team.isCrossDisc?'tf-ok':'tf-warn'}">${team.isCrossDisc?'✓':'⚠'} Cross-discipline</span>` +
+      `<span class="t-flag ${team.hasHW?'tf-ok':'tf-gap'}">${team.hasHW?'✓':'+'}  HW</span>` +
+      `<span class="t-flag ${team.hasSW?'tf-ok':'tf-gap'}">${team.hasSW?'✓':'+'}  SW</span>`;
+
+    const noteHtml = team.note
+      ? `<div class="admin-note-box">📋 ${team.note}</div>` : '';
+
+    return `<div class="admin-team-card ${cls}">
+      <div class="admin-card-header" style="background:${hdr}">
+        <span class="admin-card-id">${team.teamId}</span>
+        <span class="admin-status-badge ${badge}">${team.status}</span>
+      </div>
+      <div class="admin-card-body">
+        ${productBadge_(team.productType||'Mixed')}
+        <div class="admin-product">${team.product}</div>
+        <div class="admin-lead-row">Lead: <b>${team.lead||'—'}</b></div>
+        <div class="team-flags">${flagsHtml}</div>
+        <div class="admin-members">${membersHtml}</div>
+        ${noteHtml}
+        <div class="admin-note-box" style="border-color:rgba(13,27,62,0.15);">
+          Branches: ${(team.branches||[]).join(' · ')||'—'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// shared helpers used by both admin + suggested renders
+function avatar_(name){
+  const p = String(name||'').trim().split(' ');
+  return p.length>=2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : (name||'?').slice(0,2).toUpperCase();
+}
+function skillPill_(type){
+  const m = {'Software / AI':'p-sw','Both HW + SW':'p-both','Hardware':'p-hw'};
+  return `<span class="pill ${m[type]||'p-gen'}">${type}</span>`;
+}
+function productBadge_(type){
+  if(type==='Hardware') return `<span class="product-badge b-hw">Hardware</span>`;
+  if(type==='Software') return `<span class="product-badge b-sw">Software / AI</span>`;
+  return `<span class="product-badge b-both">HW + SW</span>`;
+}
+
 function renderRoster(students){
   document.getElementById('rosterSub').textContent =
     `All ${students.length} registered students — searchable by name, branch, or product.`;
@@ -758,6 +925,7 @@ async function loadReport(){
     renderFunnel(data.funnel, data.kpis.total);
     renderCharts(data.kpis);
     renderProducts(data.kpis.products, data.kpis.total);
+    renderAdminTeams(data.adminTeams || [], data.kpis.total);
     renderTeams(data.suggestedTeams || [], data.kpis.total);
     renderRoster(data.students);
     renderInsights(data.kpis, data.suggestedTeams || []);

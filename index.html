@@ -740,7 +740,7 @@ async function loadReport(){
     }
 
     loadMsg.textContent = 'Fetching live data from Google Sheet...';
-    const res  = await fetch(GAS_URL);
+    const res  = await fetch(GAS_URL, { redirect:'follow' });
     loadMsg.textContent = 'Processing responses...';
     const data = await res.json();
 
@@ -758,9 +758,9 @@ async function loadReport(){
     renderFunnel(data.funnel, data.kpis.total);
     renderCharts(data.kpis);
     renderProducts(data.kpis.products, data.kpis.total);
-    renderTeams(data.teams, data.kpis.total);
+    renderTeams(data.suggestedTeams || [], data.kpis.total);
     renderRoster(data.students);
-    renderInsights(data.kpis, data.teams);
+    renderInsights(data.kpis, data.suggestedTeams || []);
 
     // show report
     document.getElementById('reportRoot').style.display = 'block';

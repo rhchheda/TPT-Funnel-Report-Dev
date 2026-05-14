@@ -906,7 +906,7 @@ async function loadReport(){
       throw new Error('GAS_URL not configured. Open this HTML file and set the GAS_URL constant at the top.');
     }
 
-    loadMsg.textContent = 'Fetching live data from Tech Prowess-2026...';
+    loadMsg.textContent = 'Fetching live data from Google Sheet...';
     const res  = await fetch(GAS_URL, { redirect:'follow' });
     loadMsg.textContent = 'Processing responses...';
     const data = await res.json();
@@ -937,6 +937,8 @@ async function loadReport(){
       document.getElementById('loadingScreen').style.display = 'none';
       setupReveal();
       setTimeout(animateBars, 600);
+      // handle confetti flags
+      handleConfetti(data.confirmStatus);
     }, 500);
 
   } catch(err) {
@@ -946,6 +948,146 @@ async function loadReport(){
     document.getElementById('errorDetail').textContent = err.message;
   }
 }
+
+// ══════════════════════════════════════════════════════
+//  CONFETTI + CONFIRMATION BANNER
+// ══════════════════════════════════════════════════════
+function handleConfetti(confirmStatus) {
+  if (!confirmStatus) return;
+
+  const allConfirmed   = confirmStatus.allTeamsConfirmed &&
+                         confirmStatus.allTeamsConfirmed.includes('TRUE');
+  const firstConfirmed = confirmStatus.firstTeamConfirmed &&
+                         confirmStatus.firstTeamConfirmed.length > 0;
+
+  const alreadyAll   = sessionStorage.getItem('confetti_all');
+  const alreadyFirst = sessionStorage.getItem('confetti_first');
+
+  if (allConfirmed && !alreadyAll) {
+    sessionStorage.setItem('confetti_all','1');
+    showBannerMsg('🚀 All teams confirmed — Sprint 1 begins!', '#1b7a3e');
+    // Fire from entire Section 04A — admin confirmed teams area
+    const origin = document.getElementById('adminTeamsGrid');
+    fireConfettiFrom(origin, 'full');
+
+  } else if (firstConfirmed && !alreadyFirst) {
+    sessionStorage.setItem('confetti_first','1');
+    const teamId = confirmStatus.firstTeamConfirmed.split(' ·')[0].trim();
+    showBannerMsg(`🎯 ${teamId} is locked in — all members confirmed!`, '#c9a84c');
+
+    // Scroll to admin teams section first, then burst from that team card
+    const section = document.getElementById('adminTeamsSection');
+    if (section) section.scrollIntoView({ behavior:'smooth', block:'center' });
+
+    setTimeout(() => {
+      // Find the specific confirmed team card by teamId text
+      const cards = document.querySelectorAll('.admin-team-card');
+      let target  = null;
+      cards.forEach(card => {
+        const idEl = card.querySelector('.admin-card-id');
+        if (idEl && idEl.textContent.trim() === teamId) target = card;
+      });
+      // Fall back to section if card not found
+      fireConfettiFrom(target || section || document.getElementById('adminTeamsGrid'), 'moderate');
+    }, 800); // wait for scroll
+  }
+}
+
+function showBannerMsg(msg, color) {
+  let b = document.getElementById('confettiBanner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'confettiBanner';
+    b.style.cssText = [
+      'position:fixed','top:0','left:0','right:0',
+      'z-index:250','padding:12px','text-align:center',
+      'font-size:14px','font-weight:600','color:#fff',
+      'letter-spacing:0.04em','transition:transform 0.4s',
+      'transform:translateY(-100%)'
+    ].join(';');
+    document.body.prepend(b);
+  }
+  b.style.background = color;
+  b.textContent = msg;
+  requestAnimationFrame(() => { b.style.transform = 'translateY(0)'; });
+  setTimeout(() => { b.style.transform = 'translateY(-100%)'; }, 6000);
+}
+
+// Fire confetti bursting FROM a specific element's bounding box
+function fireConfettiFrom(el, intensity) {
+  const count  = intensity === 'full' ? 180 : 70;
+  const colors = ['#c9a84c','#e8c97a','#f5e9c8','#0d1b3e','#1b7a3e','#ffffff','#2471a3'];
+  const shapes = ['circle','square'];
+
+  // Get origin area — if element exists use its bounds, else full width
+  let originX, originY, originW, originH;
+  if (el) {
+    const rect = el.getBoundingClientRect();
+    originX = rect.left;
+    originY = rect.top;
+    originW = rect.width;
+    originH = rect.height;
+  } else {
+    originX = 0;
+    originY = window.innerHeight * 0.4;
+    originW = window.innerWidth;
+    originH = 100;
+  }
+
+  for (let i = 0; i < count; i++) {
+    const el2   = document.createElement('div');
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    const size  = 6 + Math.random() * 9;
+
+    // Start from within the origin element's bounding box
+    const startX = originX + Math.random() * originW;
+    const startY = originY + Math.random() * originH;
+
+    el2.style.cssText = [
+      'position:fixed',
+      `width:${size}px`,
+      `height:${size}px`,
+      `background:${colors[Math.floor(Math.random()*colors.length)]}`,
+      `border-radius:${shape==='circle'?'50%':'2px'}`,
+      'pointer-events:none',
+      'z-index:9999',
+      `left:${startX}px`,
+      `top:${startY}px`,
+      `opacity:${0.7+Math.random()*0.3}`
+    ].join(';');
+    document.body.appendChild(el2);
+
+    const duration = 1800 + Math.random() * 2500;
+    // For moderate — burst outward from card centre
+    // For full — rain downward across whole section
+    const driftX = intensity === 'full'
+      ? (Math.random() - 0.5) * 400
+      : (Math.random() - 0.5) * 250 + (startX - (originX + originW/2)) * 0.5;
+    const driftY = intensity === 'full'
+      ? window.innerHeight - startY + 50
+      : 200 + Math.random() * 300;
+    const rot = Math.random() * 720 * (Math.random() > 0.5 ? 1 : -1);
+
+    el2.animate([
+      { transform:`translate(0,0) rotate(0deg)`, opacity:1 },
+      { transform:`translate(${driftX}px,${driftY}px) rotate(${rot}deg)`, opacity:0 }
+    ], {
+      duration,
+      easing : 'cubic-bezier(0.25,0.46,0.45,0.94)',
+      fill   : 'forwards',
+      delay  : Math.random() * (intensity === 'full' ? 1200 : 400)
+    }).onfinish = () => el2.remove();
+  }
+}
+
+// Poll every 30 seconds for confirmation updates
+setInterval(async () => {
+  try {
+    const res  = await fetch(GAS_URL + '?t=' + Date.now(), { redirect:'follow' });
+    const data = await res.json();
+    if (data.ok && data.confirmStatus) handleConfetti(data.confirmStatus);
+  } catch(e) { /* silent */ }
+}, 30000);
 
 window.addEventListener('DOMContentLoaded', loadReport);
 </script>

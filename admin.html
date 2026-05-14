@@ -361,7 +361,14 @@ const PASSWORD = "KleTpt2026";
       <div class="teams-panel">
         <div class="teams-toolbar">
           <div class="teams-toolbar-title" id="teamsToolbarTitle">Admin Teams</div>
-          <button class="add-team-btn" onclick="addNewTeam()">+ New Team</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="add-team-btn" onclick="addNewTeam()">+ New Team</button>
+            <button class="add-team-btn" id="confirmAllBtn"
+              style="background:#1b7a3e;border-color:rgba(27,122,62,0.4);"
+              onclick="confirmAllTeams()">
+              ✉ Confirm All &amp; Send Emails
+            </button>
+          </div>
         </div>
         <div class="teams-grid" id="teamsGrid"></div>
 
@@ -502,7 +509,7 @@ function doLogout(){
 //  LOAD DATA
 // ══════════════════════════════════════════════════════
 async function loadData(){
-  setLoading(true,'Loading data from Tech Prowess-2026 ...');
+  setLoading(true,'Loading data from Sheet...');
   try{
     const res  = await fetch(GAS_URL + '?t=' + Date.now(), { redirect:'follow' });
     const data = await res.json();
@@ -873,6 +880,45 @@ async function saveTeam(btn, teamId){
   }
   btn.classList.remove('saving');
   btn.textContent = 'Save →';
+}
+
+// ══════════════════════════════════════════════════════
+//  CONFIRM ALL TEAMS & SEND EMAILS
+// ══════════════════════════════════════════════════════
+async function confirmAllTeams(){
+  const confirmed = ADMIN_TEAMS.filter(t => t.status === 'Confirmed');
+  if (confirmed.length === 0){
+    showBanner('No teams with Confirmed status found. Change at least one team status to Confirmed first.', true);
+    return;
+  }
+  const total = confirmed.reduce((sum, t) => sum + (t.members||[]).length, 0);
+  const ok = confirm(
+    `Send team confirmation emails to ${total} students across ${confirmed.length} confirmed team(s)?\n\n` +
+    `Teams: ${confirmed.map(t=>t.teamId).join(', ')}\n\n` +
+    `This cannot be undone. Each student will receive a personalised HTML email with "I'm In" and "I have a concern" CTAs.`
+  );
+  if (!ok) return;
+
+  setLoading(true, 'Sending confirmation emails...');
+  try {
+    const res  = await fetch(GAS_URL, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'sendTeamEmails', password:PASSWORD })
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (data.ok){
+      showBanner(`✓ Emails sent to ${data.sent} students across ${data.teams} teams`);
+      // Refresh KPIs after send
+      await loadData();
+    } else {
+      showBanner('Send failed: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch(e){
+    setLoading(false);
+    showBanner('Connection error: ' + e.message, true);
+  }
 }
 
 // ══════════════════════════════════════════════════════

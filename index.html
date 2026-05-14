@@ -307,6 +307,40 @@ td{padding:9px 14px;vertical-align:middle;}
 .empty-state-icon{font-size:32px;margin-bottom:0.75rem;}
 .empty-state-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
 .empty-state-text{font-size:13px;color:var(--muted);line-height:1.65;}
+/* ── BOM STYLES ── */
+.bom-ps-block{margin-bottom:2.5rem;}
+.bom-ps-header{display:flex;align-items:center;gap:12px;margin-bottom:0.75rem;flex-wrap:wrap;}
+.bom-ps-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--navy);}
+.bom-ps-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+.bom-team-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0.75rem;padding:10px 14px;background:var(--cream);border-radius:10px;border:1px solid var(--border);}
+.bom-member-chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:var(--white);border:1px solid var(--border);font-size:11px;color:var(--navy);}
+.bom-member-chip.lead{background:var(--gold-pale);border-color:rgba(201,168,76,0.4);font-weight:600;}
+.bom-chip-av{width:18px;height:18px;border-radius:50%;background:var(--navy);color:var(--gold);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.bom-chip-av.gold{background:var(--gold);color:var(--navy);}
+.bom-no-team{font-size:12px;color:var(--muted);font-style:italic;padding:8px 14px;background:var(--cream);border-radius:8px;margin-bottom:0.75rem;}
+.bom-table-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:0.5rem;}
+.bom-table-wrap table{width:100%;border-collapse:collapse;font-size:12px;}
+.bom-table-wrap thead th{background:var(--navy);color:rgba(255,255,255,0.65);font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;padding:8px 12px;text-align:left;}
+.bom-table-wrap tbody tr{border-bottom:1px solid var(--border);}
+.bom-table-wrap tbody tr:last-child{border-bottom:none;}
+.bom-table-wrap tbody tr:hover{background:var(--cream);}
+.bom-table-wrap td{padding:7px 12px;vertical-align:middle;}
+.bom-comp{font-weight:500;color:var(--navy);}
+.bom-spec{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.bom-cost{font-weight:600;color:var(--green);white-space:nowrap;}
+.bom-total-row td{background:var(--gold-pale);font-weight:600;}
+.bom-total-row .bom-cost{color:var(--navy);font-size:13px;}
+.bom-meta{display:flex;gap:1rem;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:0.5rem;}
+.bom-meta b{color:var(--navy);}
+.bom-note{font-size:11px;color:var(--muted);font-style:italic;padding:6px 10px;background:var(--cream);border-radius:6px;border-left:2px solid var(--gold);margin-bottom:1.5rem;line-height:1.6;}
+.bom-summary-box{background:var(--navy);border-radius:14px;padding:1.75rem;margin-top:0.5rem;}
+.bom-summary-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--white);margin-bottom:1rem;}
+.bom-summary-title span{color:var(--gold);font-style:italic;}
+.bom-summary-row{display:flex;gap:12px;align-items:flex-start;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.12);}
+.bom-summary-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.bom-summary-text{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;}
+.bom-summary-text b{color:var(--white);}
+
 .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
 .reveal.vis{opacity:1;transform:translateY(0);}
 
@@ -418,9 +452,25 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxvX8D2PQUV7gxlxmGh7jQj
       <div class="teams-grid" id="teamsGrid"></div>
     </section>
 
+    <!-- SECTION 05 — BILL OF MATERIALS -->
+    <section class="reveal" id="bomSection">
+      <div class="sec-label"><span class="sec-num">05</span><div class="sec-line"></div></div>
+      <div class="sec-title">Bill of <em>Materials</em></div>
+      <div class="sec-sub">
+        MVP build cost per problem statement — components, specs, quantities and estimated cost.
+        Team formation is live from admin panel. BOM is a fixed reference for EE Lab procurement.
+      </div>
+
+      <!-- LIVE TEAM CARDS PER PS — from adminTeams -->
+      <div id="bomTeamCards" style="margin-bottom:2rem;"></div>
+
+      <!-- STATIC BOM TABLES -->
+      <div id="bomTables"></div>
+    </section>
+
     <!-- STUDENT ROSTER -->
     <section class="reveal">
-      <div class="sec-label"><span class="sec-num">05</span><div class="sec-line"></div></div>
+      <div class="sec-label"><span class="sec-num">06</span><div class="sec-line"></div></div>
       <div class="sec-title">Student <em>Roster</em></div>
       <div class="sec-sub" id="rosterSub"></div>
       <div class="table-wrap">
@@ -442,7 +492,7 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxvX8D2PQUV7gxlxmGh7jQj
 
     <!-- INSIGHTS -->
     <section class="reveal">
-      <div class="sec-label"><span class="sec-num">06</span><div class="sec-line"></div></div>
+      <div class="sec-label"><span class="sec-num">07</span><div class="sec-line"></div></div>
       <div class="sec-title">Key <em>Insights</em></div>
       <div class="sec-sub">What the data is telling us — and what to act on before team formation.</div>
       <div class="insights-grid" id="insightsGrid"></div>
@@ -810,6 +860,248 @@ function productBadge_(type){
   return `<span class="product-badge b-both">HW + SW</span>`;
 }
 
+// ════════════════════════════════════════════════════════
+//  BOM DATA — static reference, live team cards
+// ════════════════════════════════════════════════════════
+const BOM_DATA = [
+  {
+    ps:'PS1', icon:'🏥', title:'Elder People Fall Detection System',
+    badge:'IoT · HW + SW', badgeBg:'#e8f5e9', badgeColor:'#1b7a3e',
+    type:'Wearable IoT device', mvp:'Detect fall → send SMS + location',
+    phase2:'Mobile app dashboard',
+    note:'ESP32 handles WiFi alerts as primary + SIM800L as GSM fallback. MVP tested with controlled drop simulation.',
+    items:[
+      ['MPU-6050 Accelerometer + Gyroscope','6-axis IMU, I2C',1,120],
+      ['ESP32 Development Board','38-pin, WiFi+BT',1,350],
+      ['SIM800L GSM Module','SMS + call alerts',1,280],
+      ['GPS Module','NEO-6M',1,350],
+      ['LiPo Battery','3.7V 2000mAh',1,250],
+      ['TP4056 Charging Module','USB-C input',1,40],
+      ['Buzzer + LED indicators','Active 5V',1,50],
+      ['3D Printed / ABS Enclosure','Wearable form',1,180],
+      ['Jumper wires + PCB / perf board','Prototyping',1,80],
+    ]
+  },
+  {
+    ps:'PS2', icon:'🍽️', title:'Mini Portable Dishwasher',
+    badge:'Mechanical · HW', badgeBg:'#e8f0fe', badgeColor:'#2471a3',
+    type:'Electro-mechanical prototype', mvp:'Spray + drain cycle for 2-3 plates',
+    phase2:'Timer + detergent auto-dispense',
+    note:'MVP validates spray mechanism and water circuit only. Use food-grade silicone throughout.',
+    items:[
+      ['DC Water Pump','12V, 3-5 LPM',2,180],
+      ['Arduino Uno / Nano','ATmega328P',1,280],
+      ['L298N Motor Driver','Dual H-bridge',1,90],
+      ['Solenoid Valve','12V, NC type',2,220],
+      ['Plastic Food-grade Container','5L capacity',1,150],
+      ['Spray Nozzles','360° rotating',4,60],
+      ['Water Level Sensor','Float switch',1,50],
+      ['12V Power Supply / Adapter','2A rated',1,200],
+      ['Silicone tubing + fittings','Food-safe, 8mm',1,150],
+      ['Push buttons + LED panel','Control UI',1,80],
+    ]
+  },
+  {
+    ps:'PS3', icon:'🐟', title:'Unattended Fish Feeding Machine',
+    badge:'Automation · HW', badgeBg:'#fff8e1', badgeColor:'#e67e22',
+    type:'Scheduled automation device', mvp:'Timed servo-drop at set intervals',
+    phase2:'App remote trigger + food level alert',
+    note:'Lowest cost BOM — good starter project. RTC ensures feeding even without WiFi.',
+    items:[
+      ['Arduino Nano','ATmega328P',1,220],
+      ['Servo Motor','SG90, 180°',1,80],
+      ['DS3231 RTC Module','Scheduled feeding',1,120],
+      ['HC-SR04 Ultrasonic Sensor','Food level detect',1,80],
+      ['ESP8266 WiFi Module','Remote trigger',1,180],
+      ['16x2 LCD Display','Schedule display',1,90],
+      ['Food hopper (3D printed / acrylic)','500g capacity',1,200],
+      ['9V Battery + holder','Portable power',1,60],
+      ['Misc — wires, PCB, resistors','Prototyping',1,80],
+    ]
+  },
+  {
+    ps:'PS4', icon:'💡', title:'Motion-sensing Night Light for Elders',
+    badge:'IoT · HW', badgeBg:'#f3e5f5', badgeColor:'#6c3483',
+    type:'Ambient smart lighting', mvp:'PIR triggers LED strip only in dark',
+    phase2:'App brightness control + elder anomaly alert',
+    note:'Simplest build — LDR ensures light only activates after dark. Phase 2 adds 3AM activity alert.',
+    items:[
+      ['PIR Motion Sensor','HC-SR501',2,60],
+      ['ESP32 / Arduino Nano','Controller',1,280],
+      ['WS2812B LED Strip','60 LED/m, 1m',1,250],
+      ['LDR Light Sensor','Ambient light detect',1,20],
+      ['5V 2A Power Supply','LED + MCU power',1,150],
+      ['Relay Module','5V, single channel',1,60],
+      ['ABS enclosure / wall mount','Custom or off-shelf',1,120],
+      ['Misc — capacitors, resistors, wire','Prototyping',1,60],
+    ]
+  },
+  {
+    ps:'PS5', icon:'🐕', title:'Pedestrian Safety Risk from Street Dogs',
+    badge:'HW + SW · IoT', badgeBg:'#fce8e8', badgeColor:'#c0392b',
+    type:'CV + IoT safety system', mvp:'Detect dog → trigger buzzer → push alert',
+    phase2:'Mobile app map of dog-risk zones',
+    note:'Highest cost BOM — Raspberry Pi needed for on-device ML. MVP can use laptop-based inference for demo.',
+    items:[
+      ['Raspberry Pi 4 / Jetson Nano','ML inference',1,3500],
+      ['USB Camera / Pi Camera','1080p, RTSP',1,800],
+      ['Ultrasonic Sensor','HC-SR04 proximity',2,80],
+      ['Buzzer / Horn (dog deterrent)','Piezo 5V high dB',1,80],
+      ['ESP32 (IoT bridge)','WiFi alert push',1,350],
+      ['Power Bank / 12V battery','Field deployment',1,400],
+      ['Weatherproof enclosure','IP54 rated',1,350],
+      ['Misc — cables, mounting hardware','Field install',1,150],
+    ]
+  }
+];
+
+function renderBOM(adminTeams) {
+  const av = name => {
+    const p = String(name||'').trim().split(' ');
+    return p.length>=2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : (name||'?').slice(0,2).toUpperCase();
+  };
+
+  // Map PS title → admin team
+  const teamByProduct = {};
+  (adminTeams||[]).forEach(t => { teamByProduct[t.product] = t; });
+
+  // Live team cards section
+  const teamCardsHtml = BOM_DATA.map(ps => {
+    // Find matching team by partial product name match
+    const team = Object.values(teamByProduct).find(t =>
+      t.product && (
+        t.product.toLowerCase().includes(ps.title.toLowerCase().split(' ')[0].toLowerCase()) ||
+        ps.title.toLowerCase().includes(t.product.toLowerCase().split(' ')[0].toLowerCase())
+      )
+    );
+
+    if (!team || !team.members || team.members.length === 0) {
+      return `<div class="bom-no-team">
+        ${ps.icon} <b>${ps.ps} — ${ps.title}</b> · No team assigned yet — pending admin panel confirmation
+      </div>`;
+    }
+
+    const chips = team.members.map(m =>
+      `<div class="bom-member-chip ${m.isLead?'lead':''}">
+        <div class="bom-chip-av ${m.isLead?'gold':''}">${av(m.name)}</div>
+        ${m.name}${m.isLead?' 👑':''}
+        <span style="font-size:10px;color:var(--muted);margin-left:2px;">· ${m.branch}</span>
+      </div>`
+    ).join('');
+
+    const crossFlag = team.isCrossDisc
+      ? `<span class="flag f-ok">✓ Cross-discipline</span>`
+      : `<span class="flag f-warn">⚠ Same branch</span>`;
+    const hwFlag = team.hasHW
+      ? `<span class="flag f-ok">✓ HW</span>`
+      : `<span class="flag f-gap">Need HW</span>`;
+    const swFlag = team.hasSW
+      ? `<span class="flag f-ok">✓ SW</span>`
+      : `<span class="flag f-gap">Need SW</span>`;
+
+    return `
+    <div style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:600;color:var(--navy);">${ps.icon} ${ps.ps} — ${ps.title}</span>
+        <span class="pill" style="background:${ps.badgeBg};color:${ps.badgeColor};">${team.teamId}</span>
+        <span class="pill" style="background:${team.status==='Confirmed'?'#e8f5e9':'var(--gold-pale)};color:${team.status==='Confirmed'?'var(--green)':'var(--navy)'};">${team.status}</span>
+      </div>
+      <div class="team-flags" style="margin-bottom:6px;">${crossFlag}${hwFlag}${swFlag}</div>
+      <div class="bom-team-strip">${chips}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bomTeamCards').innerHTML =
+    `<div style="margin-bottom:1.5rem;">
+       <div style="font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;
+                   color:var(--muted);margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;">
+         <span>Team Assignments</span>
+         <span style="flex:1;height:1px;background:var(--border);max-width:50px;display:inline-block;"></span>
+         <span style="font-size:10px;color:var(--green);">● Live from admin panel</span>
+       </div>
+       ${teamCardsHtml}
+     </div>`;
+
+  // Static BOM tables
+  const tablesHtml = BOM_DATA.map(ps => {
+    const items = ps.items;
+    const total = items.reduce((sum, item) => sum + (item[2] * item[3]), 0);
+    const rows  = items.map((item, i) => {
+      const [name, spec, qty, unit] = item;
+      const bg = i % 2 === 0 ? 'var(--cream)' : 'var(--soft)';
+      return `<tr style="background:${bg};">
+        <td>${i+1}</td>
+        <td class="bom-comp">${name}</td>
+        <td class="bom-spec">${spec}</td>
+        <td style="text-align:center;">${qty}</td>
+        <td class="bom-cost">₹${unit.toLocaleString('en-IN')}</td>
+        <td class="bom-cost">₹${(qty*unit).toLocaleString('en-IN')}</td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="bom-ps-block">
+      <div class="bom-ps-header">
+        <div class="bom-ps-title">${ps.icon} ${ps.ps} — ${ps.title}</div>
+        <span class="bom-ps-badge" style="background:${ps.badgeBg};color:${ps.badgeColor};">${ps.badge}</span>
+      </div>
+      <div class="bom-meta">
+        <span>Type: <b>${ps.type}</b></span>
+        <span>MVP: <b>${ps.mvp}</b></span>
+        <span>Phase 2: <b>${ps.phase2}</b></span>
+      </div>
+      <div class="bom-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Component</th><th>Spec / Model</th><th style="text-align:center;">Qty</th><th>Unit ₹</th><th>Total ₹</th></tr></thead>
+          <tbody>
+            ${rows}
+            <tr class="bom-total-row">
+              <td colspan="5" style="text-align:right;font-weight:600;padding:8px 12px;">Estimated MVP Build Cost</td>
+              <td class="bom-cost">₹${total.toLocaleString('en-IN')}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bom-note">${ps.note}</div>
+    </div>`;
+  }).join('');
+
+  // Grand total
+  const grandTotal = BOM_DATA.reduce((sum, ps) =>
+    sum + ps.items.reduce((s, item) => s + item[2]*item[3], 0), 0);
+
+  const summaryHtml = `
+    <div class="bom-summary-box">
+      <div class="bom-summary-title">BOM <span>Cost Summary</span></div>
+      ${BOM_DATA.map(ps => {
+        const t = ps.items.reduce((s,item) => s+item[2]*item[3], 0);
+        return `<div class="bom-summary-row">
+          <span class="bom-summary-icon">${ps.icon}</span>
+          <div class="bom-summary-text">
+            <b>${ps.ps} — ${ps.title}</b> &nbsp;·&nbsp; ₹${t.toLocaleString('en-IN')} &nbsp;·&nbsp; ${ps.type}
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="bom-summary-row" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.3);margin-top:6px;">
+        <span class="bom-summary-icon">💰</span>
+        <div class="bom-summary-text">
+          <b>Total for all 5 PS MVP builds: ₹${grandTotal.toLocaleString('en-IN')}</b>
+          &nbsp;·&nbsp; Average ₹${Math.round(grandTotal/5).toLocaleString('en-IN')} per team
+          &nbsp;·&nbsp; EE Lab bulk sourcing saves 15–20%
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('bomTables').innerHTML = `
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;
+                color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+      <span>Component Lists & Costs</span>
+      <span style="flex:1;height:1px;background:var(--border);max-width:50px;display:inline-block;"></span>
+      <span style="font-size:10px;color:var(--muted);">Fixed reference · EE Lab procurement</span>
+    </div>
+    ${tablesHtml}
+    ${summaryHtml}`;
+}
+
 function renderRoster(students){
   document.getElementById('rosterSub').textContent =
     `All ${students.length} registered students — searchable by name, branch, or product.`;
@@ -906,7 +1198,7 @@ async function loadReport(){
       throw new Error('GAS_URL not configured. Open this HTML file and set the GAS_URL constant at the top.');
     }
 
-    loadMsg.textContent = 'Fetching live data from Tech Prowess Team...';
+    loadMsg.textContent = 'Fetching live data from Google Sheet...';
     const res  = await fetch(GAS_URL, { redirect:'follow' });
     loadMsg.textContent = 'Processing responses...';
     const data = await res.json();
@@ -927,6 +1219,7 @@ async function loadReport(){
     renderProducts(data.kpis.products, data.kpis.total);
     renderAdminTeams(data.adminTeams || [], data.kpis.total);
     renderTeams(data.suggestedTeams || [], data.kpis.total);
+    renderBOM(data.adminTeams || []);
     renderRoster(data.students);
     renderInsights(data.kpis, data.suggestedTeams || []);
 

@@ -906,7 +906,7 @@ async function loadReport(){
       throw new Error('GAS_URL not configured. Open this HTML file and set the GAS_URL constant at the top.');
     }
 
-    loadMsg.textContent = 'Fetching live data from Tech Prowess Team...';
+    loadMsg.textContent = 'Fetching live data from Google Sheet...';
     const res  = await fetch(GAS_URL, { redirect:'follow' });
     loadMsg.textContent = 'Processing responses...';
     const data = await res.json();
@@ -955,42 +955,41 @@ async function loadReport(){
 function handleConfetti(confirmStatus) {
   if (!confirmStatus) return;
 
-  const allConfirmed   = confirmStatus.allTeamsConfirmed &&
-                         confirmStatus.allTeamsConfirmed.includes('TRUE');
-  const firstConfirmed = confirmStatus.firstTeamConfirmed &&
-                         confirmStatus.firstTeamConfirmed.length > 0;
+  const allConfirmed   = !!(confirmStatus.allTeamsConfirmed &&
+                            confirmStatus.allTeamsConfirmed.includes('TRUE'));
+  const firstConfirmed = !!(confirmStatus.firstTeamConfirmed &&
+                            confirmStatus.firstTeamConfirmed.trim().length > 0);
 
   const alreadyAll   = sessionStorage.getItem('confetti_all');
   const alreadyFirst = sessionStorage.getItem('confetti_first');
 
-  if (allConfirmed && !alreadyAll) {
-    sessionStorage.setItem('confetti_all','1');
-    showBannerMsg('🚀 All teams confirmed — Sprint 1 begins!', '#1b7a3e');
-    // Fire from entire Section 04A — admin confirmed teams area
-    const origin = document.getElementById('adminTeamsGrid');
-    fireConfettiFrom(origin, 'full');
+  // Delay to ensure DOM is fully rendered before querying elements
+  setTimeout(() => {
+    if (allConfirmed && !alreadyAll) {
+      sessionStorage.setItem('confetti_all','1');
+      showBannerMsg('🚀 All teams confirmed — Sprint 1 begins!', '#1b7a3e');
+      const origin = document.getElementById('adminTeamsGrid');
+      fireConfettiFrom(origin, 'full');
 
-  } else if (firstConfirmed && !alreadyFirst) {
-    sessionStorage.setItem('confetti_first','1');
-    const teamId = confirmStatus.firstTeamConfirmed.split(' ·')[0].trim();
-    showBannerMsg(`🎯 ${teamId} is locked in — all members confirmed!`, '#c9a84c');
+    } else if (firstConfirmed && !alreadyFirst) {
+      sessionStorage.setItem('confetti_first','1');
+      const teamId = confirmStatus.firstTeamConfirmed.split('·')[0].trim();
+      showBannerMsg(`🎯 ${teamId} is locked in — all members confirmed!`, '#c9a84c');
 
-    // Scroll to admin teams section first, then burst from that team card
-    const section = document.getElementById('adminTeamsSection');
-    if (section) section.scrollIntoView({ behavior:'smooth', block:'center' });
+      const section = document.getElementById('adminTeamsSection');
+      if (section) section.scrollIntoView({ behavior:'smooth', block:'center' });
 
-    setTimeout(() => {
-      // Find the specific confirmed team card by teamId text
-      const cards = document.querySelectorAll('.admin-team-card');
-      let target  = null;
-      cards.forEach(card => {
-        const idEl = card.querySelector('.admin-card-id');
-        if (idEl && idEl.textContent.trim() === teamId) target = card;
-      });
-      // Fall back to section if card not found
-      fireConfettiFrom(target || section || document.getElementById('adminTeamsGrid'), 'moderate');
-    }, 800); // wait for scroll
-  }
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.admin-team-card');
+        let target  = null;
+        cards.forEach(card => {
+          const idEl = card.querySelector('.admin-card-id');
+          if (idEl && idEl.textContent.trim() === teamId) target = card;
+        });
+        fireConfettiFrom(target || section || document.getElementById('adminTeamsGrid'), 'moderate');
+      }, 900);
+    }
+  }, 800); // wait for render
 }
 
 function showBannerMsg(msg, color) {
@@ -1079,6 +1078,15 @@ function fireConfettiFrom(el, intensity) {
     }).onfinish = () => el2.remove();
   }
 }
+
+// ── Test helper — run in browser console to reset and refire
+// Type: resetConfetti() in browser console to test again
+function resetConfetti() {
+  sessionStorage.removeItem('confetti_all');
+  sessionStorage.removeItem('confetti_first');
+  console.log('Confetti flags cleared. Reload page to test again.');
+}
+window.resetConfetti = resetConfetti;
 
 // Poll every 30 seconds for confirmation updates
 setInterval(async () => {

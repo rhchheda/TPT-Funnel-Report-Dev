@@ -1004,7 +1004,7 @@ function renderBOM(adminTeams) {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <span style="font-size:12px;font-weight:600;color:var(--navy);">${ps.icon} ${ps.ps} — ${ps.title}</span>
         <span class="pill" style="background:${ps.badgeBg};color:${ps.badgeColor};">${team.teamId}</span>
-        <span class="pill" style="background:${team.status==='Confirmed'?'#e8f5e9':'var(--gold-pale)};color:${team.status==='Confirmed'?'var(--green)':'var(--navy)'};">${team.status}</span>
+        <span class="pill" style="background:${team.status==='Confirmed'?'#e8f5e9':'#f5e9c8'};color:${team.status==='Confirmed'?'#1b7a3e':'#0d1b3e'};">${team.status}</span>
       </div>
       <div class="team-flags" style="margin-bottom:6px;">${crossFlag}${hwFlag}${swFlag}</div>
       <div class="bom-team-strip">${chips}</div>
